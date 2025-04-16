@@ -34,11 +34,15 @@ redisClient.on("error", (err) => {
 app.use(helmet());
 app.use(
   cors({
-    origin: ["http://localhost", "http://138.201.159.116"],
+    origin: [
+      "http://localhost:3000",
+      "http://138.201.159.116",
+      "http://138.201.159.116:3000",
+    ],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders: "Content-Type, Authorization, X-Requested-With",
-    credentials: true,
-    sameOrigin: true,
+    credentials: false,
+    // sameOrigin: true,
   })
 );
 app.use(express.json());
