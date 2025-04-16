@@ -37,6 +37,8 @@ app.use(
     origin: ["http://localhost", "http://138.201.159.116"],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders: "Content-Type, Authorization, X-Requested-With",
+    credentials: true,
+    sameOrigin: true,
   })
 );
 app.use(express.json());
