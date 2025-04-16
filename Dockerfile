@@ -1,4 +1,4 @@
-FROM node:22
+FROM node:18-alpine
 
 WORKDIR /usr/src/app
 
@@ -8,6 +8,8 @@ RUN npm install
 
 COPY . .
 
+RUN npx prisma generate --schema=./prisma/schema.prisma
+
 EXPOSE 3030
 
-CMD [ "node", "start" ]
+CMD [ "npm", "start" ]

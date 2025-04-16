@@ -32,7 +32,13 @@ redisClient.on("error", (err) => {
 });
 //middlewares
 app.use(helmet());
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost", "http://138.201.159.116"],
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders: "Content-Type, Authorization, X-Requested-With",
+  })
+);
 app.use(express.json());
 //RateLimit
 const rateLimiter = rateLimit({
