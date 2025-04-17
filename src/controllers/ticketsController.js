@@ -30,8 +30,6 @@ export const getAllShifts = async (req, res, next) => {
   try {
     const { date } = req.query;
     const endDate = date + "T23:59:59";
-    console.log(date);
-    console.log(endDate);
     const shifts = await ticketService.getAllShiftsService(date, endDate);
     res.status(200).json({
       status: 200,
@@ -126,7 +124,7 @@ export const createTicketController = async (req, res, next) => {
 
 export const getTicketsByShiftController = async (req, res, next) => {
   const { shift_id } = req.params;
-  const { sort, user_only } = req.query;
+  const { sort, sort_by } = req.query;
   // const user_id = req.user.id;
   // const team_id = req.user.team_id;
 
@@ -145,8 +143,7 @@ export const getTicketsByShiftController = async (req, res, next) => {
     const tickets = await ticketService.getTicketsByShiftService({
       shift_id: +shift_id,
       sort,
-      // user_id: user_only ? user_id : undefined,
-      // team_id,
+      sort_by,
     });
 
     // await req.redisClient.setex(cachekey, 300, JSON.stringify(tickets));

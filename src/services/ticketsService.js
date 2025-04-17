@@ -79,6 +79,7 @@ export const getTicketsByShiftService = async ({
   sort = "asc",
   user_id,
   team_id,
+  sort_by = "created_at",
 }) => {
   try {
     const tickets = await prisma.ticket.findMany({
@@ -88,7 +89,7 @@ export const getTicketsByShiftService = async ({
         team_id,
       },
       orderBy: {
-        created_at: sort,
+        [sort_by]: sort,
       },
     });
     return tickets;
