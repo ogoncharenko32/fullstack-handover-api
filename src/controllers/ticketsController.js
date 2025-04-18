@@ -30,24 +30,11 @@ export const getAllShifts = async (req, res, next) => {
   try {
     const { date } = req.query;
     const endDate = date + "T23:59:59";
-    const shifts = await ticketService.getAllShiftsService(date, endDate);
-    res.status(200).json({
-      status: 200,
-      message: "Shifts fetched successfully",
-      data: shifts,
-    });
-  } catch (error) {
-    logger.error(error);
-    next(error);
-  }
-};
-export const getAllShiftsForTeamController = async (req, res, next) => {
-  const team_id = req.user.team_id;
-  const { take, skip, sort } = req.query;
 
-  try {
-    const cachekey = `shifts-${team_id}-${take}-${skip}-${sort}`;
+    const cachekey = `shifts-${date}-${endDate}`;
+
     const cachedShifts = await req.redisClient.get(cachekey);
+
     if (cachedShifts) {
       logger.info("Fetching shifts from cache");
       return res.status(200).json({
@@ -57,12 +44,7 @@ export const getAllShiftsForTeamController = async (req, res, next) => {
       });
     }
 
-    const shifts = await ticketService.getAllShiftsForTeamService({
-      team_id,
-      take: Number(take) || undefined,
-      skip: Number(skip) || undefined,
-      sort: sort || undefined,
-    });
+    const shifts = await ticketService.getAllShiftsService(date, endDate);
 
     await req.redisClient.setex(cachekey, 300, JSON.stringify(shifts));
 
@@ -76,6 +58,41 @@ export const getAllShiftsForTeamController = async (req, res, next) => {
     next(error);
   }
 };
+// export const getAllShiftsForTeamController = async (req, res, next) => {
+//   const team_id = req.user.team_id;
+//   const { take, skip, sort } = req.query;
+
+//   try {
+//     const cachekey = `shifts-${team_id}-${take}-${skip}-${sort}`;
+//     const cachedShifts = await req.redisClient.get(cachekey);
+//     if (cachedShifts) {
+//       logger.info("Fetching shifts from cache");
+//       return res.status(200).json({
+//         status: 200,
+//         message: "Shifts fetched successfully",
+//         data: JSON.parse(cachedShifts),
+//       });
+//     }
+
+//     const shifts = await ticketService.getAllShiftsForTeamService({
+//       team_id,
+//       take: Number(take) || undefined,
+//       skip: Number(skip) || undefined,
+//       sort: sort || undefined,
+//     });
+
+//     await req.redisClient.setex(cachekey, 300, JSON.stringify(shifts));
+
+//     res.status(200).json({
+//       status: 200,
+//       message: "Shifts fetched successfully",
+//       data: shifts,
+//     });
+//   } catch (error) {
+//     logger.error(error);
+//     next(error);
+//   }
+// };
 
 export const createTicketController = async (req, res, next) => {
   const {
@@ -104,7 +121,7 @@ export const createTicketController = async (req, res, next) => {
       user_name,
     });
 
-    const keys = await req.redisClient.keys("ticket-*");
+    const keys = await req.redisClient.keys(`ticket-${shift_id}*`);
     if (keys.length > 0) {
       await req.redisClient.del(keys);
     }
@@ -129,7 +146,7 @@ export const getTicketsByShiftController = async (req, res, next) => {
   // const team_id = req.user.team_id;
 
   try {
-    // const cachekey = `ticket-${shift_id}`;
+    // const cachekey = `ticket-${shift_id}-${sort}-${sort_by}`;
     // const cachedTickets = await req.redisClient.get(cachekey);
     // if (cachedTickets) {
     //   logger.info("Fetching tickets from cache");
