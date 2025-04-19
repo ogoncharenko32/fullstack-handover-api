@@ -160,16 +160,16 @@ export const getTicketsByShiftController = async (req, res, next) => {
   // const team_id = req.user.team_id;
 
   try {
-    // const cachekey = `ticket-${shift_id}-${sort}-${sort_by}`;
-    // const cachedTickets = await req.redisClient.get(cachekey);
-    // if (cachedTickets) {
-    //   logger.info("Fetching tickets from cache");
-    //   return res.status(200).json({
-    //     status: 200,
-    //     message: "Tickets fetched successfully",
-    //     data: JSON.parse(cachedTickets),
-    //   });
-    // }
+    const cachekey = `ticket-${shift_id}-${sort}-${sort_by}`;
+    const cachedTickets = await req.redisClient.get(cachekey);
+    if (cachedTickets) {
+      logger.info("Fetching tickets from cache");
+      return res.status(200).json({
+        status: 200,
+        message: "Tickets fetched successfully",
+        data: JSON.parse(cachedTickets),
+      });
+    }
 
     const tickets = await ticketService.getTicketsByShiftService({
       shift_id: +shift_id,
@@ -177,7 +177,7 @@ export const getTicketsByShiftController = async (req, res, next) => {
       sort_by,
     });
 
-    // await req.redisClient.setex(cachekey, 300, JSON.stringify(tickets));
+    await req.redisClient.setex(cachekey, 300, JSON.stringify(tickets));
 
     res.status(200).json({
       status: 200,
@@ -237,6 +237,11 @@ export const updateTicketController = async (req, res, next) => {
       important,
     });
 
+    const keys = await req.redisClient.keys("ticket-*");
+    if (keys.length > 0) {
+      await req.redisClient.del(keys);
+    }
+
     res.status(200).json({
       status: 200,
       message: "Ticket updated successfully",
@@ -253,6 +258,12 @@ export const deleteTicketController = async (req, res, next) => {
 
   try {
     const ticket = await ticketService.deleteTicketService(+id);
+
+    const keys = await req.redisClient.keys("ticket-*");
+    if (keys.length > 0) {
+      await req.redisClient.del(keys);
+    }
+
     res.status(200).json({
       status: 200,
       message: "Ticket deleted successfully",
