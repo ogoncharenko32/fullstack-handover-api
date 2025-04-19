@@ -1,5 +1,6 @@
 import logger from "../utils/logger.js";
 import * as ticketService from "../services/ticketsService.js";
+import getUTCDateRange from "../utils/getUTCDateRange.js";
 
 export const createShiftController = async (req, res, next) => {
   try {
@@ -8,10 +9,10 @@ export const createShiftController = async (req, res, next) => {
 
     const shift = await ticketService.createShiftService(name);
 
-    const keys = await req.redisClient.keys("shifts-*");
-    if (keys.length > 0) {
-      await req.redisClient.del(keys);
-    }
+    // const keys = await req.redisClient.keys("shifts-*");
+    // if (keys.length > 0) {
+    //   await req.redisClient.del(keys);
+    // }
 
     res.status(201).json({
       status: 201,
@@ -28,25 +29,38 @@ export const createShiftController = async (req, res, next) => {
 
 export const getAllShifts = async (req, res, next) => {
   try {
-    const { date } = req.query;
-    const endDate = date + "T23:59:59";
+    const { date, timezoneOffset } = req.query;
 
-    const cachekey = `shifts-${date}-${endDate}`;
+    // const cachekey = `shifts-${date}-${endDate}`;
 
-    const cachedShifts = await req.redisClient.get(cachekey);
+    // const cachedShifts = await req.redisClient.get(cachekey);
 
-    if (cachedShifts) {
-      logger.info("Fetching shifts from cache");
-      return res.status(200).json({
-        status: 200,
-        message: "Shifts fetched successfully",
-        data: JSON.parse(cachedShifts),
-      });
-    }
+    // if (cachedShifts) {
+    //   logger.info("Fetching shifts from cache");
+    //   return res.status(200).json({
+    //     status: 200,
+    //     message: "Shifts fetched successfully",
+    //     data: JSON.parse(cachedShifts),
+    //   });
+    // }
 
-    const shifts = await ticketService.getAllShiftsService(date, endDate);
+    const offset = Number(timezoneOffset) || 0;
 
-    await req.redisClient.setex(cachekey, 300, JSON.stringify(shifts));
+    const localStart = new Date(date + "T00:00:00");
+    localStart.setMinutes(localStart.getMinutes() - offset);
+
+    const localEnd = new Date(date + "T23:59:59.999");
+    localEnd.setMinutes(localEnd.getMinutes() - offset);
+
+    console.log("Start:", localStart.toISOString());
+    console.log("End:", localEnd.toISOString());
+
+    const shifts = await ticketService.getAllShiftsService(
+      localStart,
+      localEnd
+    );
+
+    // await req.redisClient.setex(cachekey, 300, JSON.stringify(shifts));
 
     res.status(200).json({
       status: 200,
