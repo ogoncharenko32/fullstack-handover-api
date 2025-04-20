@@ -36,7 +36,7 @@ model Ticket {
   id          Int      @id @default(autoincrement())
   link        String
   description String?
-  status      String   @default("in progress")
+  status      String   @default("In Progress")
   important   Boolean  @default(false)
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
