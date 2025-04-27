@@ -10,6 +10,7 @@ import errorHandler from "./middlewares/errorHandler.js";
 import authRouter from "./routes/authRouter.js";
 import authMiddleware from "./middlewares/authMiddleware.js";
 import ticketRouter from "./routes/ticketRouter.js";
+import maintenanceRouter from "./routes/maintenanceRouter.js";
 
 dotenv.config();
 
@@ -76,6 +77,14 @@ app.use(
   },
   // authMiddleware,
   ticketRouter
+);
+app.use(
+  "/mw",
+  (req, res, next) => {
+    req.redisClient = redisClient;
+    next();
+  },
+  maintenanceRouter
 );
 
 //

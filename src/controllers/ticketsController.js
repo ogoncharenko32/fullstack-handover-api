@@ -52,9 +52,6 @@ export const getAllShifts = async (req, res, next) => {
     const localEnd = new Date(date + "T23:59:59.999");
     localEnd.setMinutes(localEnd.getMinutes() - offset);
 
-    console.log("Start:", localStart.toISOString());
-    console.log("End:", localEnd.toISOString());
-
     const shifts = await ticketService.getAllShiftsService(
       localStart,
       localEnd

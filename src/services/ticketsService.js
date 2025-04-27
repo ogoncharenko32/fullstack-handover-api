@@ -56,8 +56,6 @@ export const getAllShiftsForTeamService = async ({
 
 export const getAllShiftsService = async (localStart, localEnd) => {
   try {
-    console.log("Start:", localStart);
-    console.log("End:", localEnd);
     const shifts = await prisma.shift.findMany({
       where: {
         created_at: {
@@ -69,7 +67,6 @@ export const getAllShiftsService = async (localStart, localEnd) => {
         created_at: "desc",
       },
     });
-    console.log(shifts);
     return shifts;
   } catch (error) {
     logger.error(error);
